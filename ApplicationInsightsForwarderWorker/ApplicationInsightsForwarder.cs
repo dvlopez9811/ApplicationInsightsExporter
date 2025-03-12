@@ -23,7 +23,7 @@ namespace ApplicationInsightsForwarderWorker
 
             _client = httpClientFactory.CreateClient("ApplicationInsightsExporter");
 
-            _otlpEndpoint = Environment.GetEnvironmentVariable("OTLP_ENDPOINT") ?? string.Empty;
+            _otlpEndpoint = Environment.GetEnvironmentVariable("OTLP_ENDPOINT");
             if (!_otlpEndpoint.Contains("v1/traces"))
                 if (_otlpEndpoint.EndsWith("/"))
                     _otlpEndpoint = _otlpEndpoint += "v1/traces";
@@ -40,36 +40,20 @@ namespace ApplicationInsightsForwarderWorker
             {
                 try
                 {
-                    if (eventData.Body.Length == 0)
-                    {
-                        log.LogWarning("Evento recibido sin contenido en el cuerpo. Se omite.");
-                        continue;
-                    }
                     //string messageBody = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
                     byte[] msgBody = eventData.Body.ToArray();
                     string messageBody = Encoding.UTF8.GetString(msgBody, 0, msgBody.Length);
 
-                    if (string.IsNullOrWhiteSpace(messageBody))
-                    {
-                        log.LogWarning("El mensaje recibido está vacío o es inválido. Se omite.");
-                        continue;
-                    }
-
-                    log.LogInformation($"Mensaje recibido: {messageBody.Substring(0, Math.Min(500, messageBody.Length))}...");
-
                     var exportTraceServiceRequest = _converter.FromApplicationInsights(messageBody);
-                    if (exportTraceServiceRequest == null)
-                    {
-                        log.LogWarning("No se pudo convertir el evento correctamente. Se omite.");
+                    if (exportTraceServiceRequest == null) // if format was not able to be processed/mapped.. 
                         continue;
-                    }
-                    
+
                     var content = new ApplicationInsights2OTLP.ExportRequestContent(exportTraceServiceRequest);
 
                     var res = await _client.PostAsync(_otlpEndpoint, content);
                     if (!res.IsSuccessStatusCode)
                     {
-                        log.LogError($"Error enviando la traza: {res.StatusCode}. Mensaje: {messageBody.Substring(0, Math.Min(500, messageBody.Length))}...");
+                        log.LogError("Couldn't send span " + (res.StatusCode) + "\n" + messageBody);
                     }
 
                     await Task.Yield();
