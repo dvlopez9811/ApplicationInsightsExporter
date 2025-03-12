@@ -34,7 +34,7 @@ namespace ApplicationInsightsForwarderWorker
             {
                 try
                 {
-                    if (eventData.Body == null || eventData.Body.Length == 0)
+                    if (eventData.Body.Length == 0)
                     {
                         log.LogWarning("Evento recibido sin contenido en el cuerpo. Se omite.");
                         continue;
