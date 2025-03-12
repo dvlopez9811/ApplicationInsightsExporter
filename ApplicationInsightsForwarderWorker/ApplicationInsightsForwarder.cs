@@ -42,7 +42,7 @@ namespace ApplicationInsightsForwarderWorker
                 {
                     if (eventData.Body.Length == 0)
                     {
-                        _logger.LogWarning("Evento recibido sin contenido en el cuerpo. Se omite.");
+                        log.LogWarning("Evento recibido sin contenido en el cuerpo. Se omite.");
                         continue;
                     }
                     //string messageBody = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
@@ -51,16 +51,16 @@ namespace ApplicationInsightsForwarderWorker
 
                     if (string.IsNullOrWhiteSpace(messageBody))
                     {
-                        _logger.LogWarning("El mensaje recibido está vacío o es inválido. Se omite.");
+                        log.LogWarning("El mensaje recibido está vacío o es inválido. Se omite.");
                         continue;
                     }
 
-                    _logger.LogInformation($"Mensaje recibido: {messageBody.Substring(0, Math.Min(500, messageBody.Length))}...");
+                    log.LogInformation($"Mensaje recibido: {messageBody.Substring(0, Math.Min(500, messageBody.Length))}...");
 
                     var exportTraceServiceRequest = _converter.FromApplicationInsights(messageBody);
                     if (exportTraceServiceRequest == null)
                     {
-                        _logger.LogWarning("No se pudo convertir el evento correctamente. Se omite.");
+                        log.LogWarning("No se pudo convertir el evento correctamente. Se omite.");
                         continue;
                     }
                     
@@ -69,7 +69,7 @@ namespace ApplicationInsightsForwarderWorker
                     var res = await _client.PostAsync(_otlpEndpoint, content);
                     if (!res.IsSuccessStatusCode)
                     {
-                        _logger.LogError($"Error enviando la traza: {res.StatusCode}. Mensaje: {messageBody.Substring(0, Math.Min(500, messageBody.Length))}...");
+                        log.LogError($"Error enviando la traza: {res.StatusCode}. Mensaje: {messageBody.Substring(0, Math.Min(500, messageBody.Length))}...");
                     }
 
                     await Task.Yield();
@@ -78,7 +78,6 @@ namespace ApplicationInsightsForwarderWorker
                 {
                     // We need to keep processing the rest of the batch - capture this exception and continue.
                     // Also, consider capturing details of the message that failed processing so it can be processed again later.
-                    _logger.LogError($"Error procesando evento: {e.Message}");
                     exceptions.Add(e);
                 }
             }
