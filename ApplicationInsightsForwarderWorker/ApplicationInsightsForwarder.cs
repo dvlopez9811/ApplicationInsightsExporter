@@ -40,9 +40,15 @@ namespace ApplicationInsightsForwarderWorker
             {
                 try
                 {
+                    log.LogInformation($"Procesando evento con tamaño: {eventData.Body.Length} bytes.");
                     //string messageBody = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
                     byte[] msgBody = eventData.Body.ToArray();
-                    string messageBody = Encoding.UTF8.GetString(msgBody, 0, msgBody.Length);
+                    if (msgBody.Length == 0)
+                    {
+                      log.LogWarning("Evento recibido con cuerpo vacío, saltando procesamiento.");
+                      continue; // Evita procesar eventos vacíos
+                    }
+                    string messageBody = Encoding.UTF8.GetString(msgBody);
 
                     var exportTraceServiceRequest = _converter.FromApplicationInsights(messageBody);
                     if (exportTraceServiceRequest == null) // if format was not able to be processed/mapped.. 
