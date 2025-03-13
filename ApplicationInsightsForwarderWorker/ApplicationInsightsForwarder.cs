@@ -42,7 +42,6 @@ namespace ApplicationInsightsForwarderWorker
                 {
                     //string messageBody = Encoding.UTF8.GetString(eventData.Body.Array, eventData.Body.Offset, eventData.Body.Count);
                     byte[] msgBody = eventData.Body.ToArray();
-                    if (msgBody.Length == 0)
                     string messageBody = Encoding.UTF8.GetString(msgBody, 0, msgBody.Length);
 
                     var exportTraceServiceRequest = _converter.FromApplicationInsights(messageBody);
