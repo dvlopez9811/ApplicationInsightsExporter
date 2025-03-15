@@ -271,16 +271,29 @@ namespace ApplicationInsights2OTLP
                     TryAddResourceAttribute(resSpan, OTelSemConv.AttributeHostId, Value(properties, Properties.HostInstanceId));
                 }
 
-                var libSpan = new InstrumentationLibrarySpans();
+               var libSpan = new InstrumentationLibrarySpans();
 
-                var instr = Value(t.Current, Attributes.SDKVersion).Split(new char[] {':'});
-
-                libSpan.InstrumentationLibrary = new InstrumentationLibrary()
-                {
-                    Name = instr[0] ?? ApplicationInsights.SemanticConventions.InstrumentationLibraryName,
-                    Version = instr[1] ?? String.Empty
-                };
-                resSpan.InstrumentationLibrarySpans.Add(libSpan);
+               var sdkVersionValue = Value(t.Current, Attributes.SDKVersion);
+               if (!string.IsNullOrEmpty(sdkVersionValue))
+               {
+                   var instr = sdkVersionValue.Split(new char[] { ':' });
+               
+                   libSpan.InstrumentationLibrary = new InstrumentationLibrary()
+                   {
+                       Name = instr.Length > 0 ? instr[0] : ApplicationInsights.SemanticConventions.InstrumentationLibraryName,
+                       Version = instr.Length > 1 ? instr[1] : string.Empty
+                   };
+               }
+               else
+               {
+                   libSpan.InstrumentationLibrary = new InstrumentationLibrary()
+                   {
+                       Name = ApplicationInsights.SemanticConventions.SDKVersionOtel,
+                       Version = ApplicationInsights.SemanticConventions.SDKNameOtel
+                   };
+               }
+               
+               resSpan.InstrumentationLibrarySpans.Add(libSpan);
 
                 var span = new Span();
                 libSpan.Spans.Add(span);

@@ -21,8 +21,9 @@ namespace ApplicationInsights
         public const string Source = ScopeAppInsights + ".source";
         public const string Target = ScopeAppInsights + ".target";
         public const string ResultCode = ScopeAppInsights + ".resultcode";
-
-        
+        public const string Properties = "Properties";
+        public const string SDKVersionOtel = Properties + ".instrumentationlibrary.version";
+        public const string SDKNameOtel = Properties + ".instrumentationlibrary.name";        
 
     }
 }
