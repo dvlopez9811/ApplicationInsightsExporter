@@ -288,8 +288,8 @@ namespace ApplicationInsights2OTLP
                {
                    libSpan.InstrumentationLibrary = new InstrumentationLibrary()
                    {
-                       Name = ApplicationInsights.SemanticConventions.SDKVersionOtel,
-                       Version = ApplicationInsights.SemanticConventions.SDKNameOtel
+                       Name = ApplicationInsights.SemanticConventions.SDKNameOtel,
+                       Version = ApplicationInsights.SemanticConventions.SDKVersionOtel
                    };
                }
                
